@@ -1,7 +1,51 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import App from "./components/App";
+import React, { useEffect, useState } from "react";
+import Header from "./Header";
+import Footer from "./Footer";
+import Note from "./Note";
+import CreateArea from "./CreateArea";
 
-ReactDOM.render(<App />, document.getElementById("root"));
+function App() {
+  
+  const [notes, setNotes] = useState(()=>{
+    const localValue = localStorage.getItem("ITEMS")
+    if(localValue==null) return[]
+    return JSON.parse(localValue)
+  });
+  useEffect(()=>{
+    localStorage.setItem("ITEMS", JSON.stringify(notes))
+  },[notes])
+  function addNote(newNote) {
+    setNotes(prevNotes => {
+      return [...prevNotes, newNote];
+    });
+  }
 
-export default App
+  function deleteNote(id) {
+    setNotes(prevNotes => {
+      return prevNotes.filter((noteItem, index) => {
+        return index !== id;
+      });
+    });
+  }
+
+  return (
+    <div>
+      <Header />
+      <CreateArea onAdd={addNote} />
+      {notes.map((noteItem, index) => {
+        return (
+          <Note
+            key={index}
+            id={index}
+            title={noteItem.title}
+            content={noteItem.content}
+            onDelete={deleteNote}
+          />
+        );
+      })}
+      <Footer />
+    </div>
+  );
+}
+
+export default App;
